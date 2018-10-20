@@ -1,0 +1,113 @@
+local is51 = _VERSION == 'Lua 5.1'
+local global = _ENV or _G
+local make_environment
+make_environment = function(node_handler)
+  local environment
+  do
+    environment = setmetatable({ }, {
+      __index = function(self, key)
+        local _exp_0 = key
+        if 'escape' == _exp_0 then
+          return function(...)
+            return ...
+          end
+        else
+          return global[key] or function(...)
+            return self.node(key, ...)
+          end
+        end
+      end
+    })
+  end
+  if is51 then
+    setfenv(1, environment)
+  end
+  local _ENV = _ENV and environment
+  local flatten
+  flatten = function(tab, flat)
+    if flat == nil then
+      flat = { }
+    end
+    for key, value in pairs(tab) do
+      if type(key) == "number" then
+        if type(value) == "table" then
+          flatten(value, flat)
+        else
+          flat[#flat + 1] = value
+        end
+      else
+        if type(value) == "table" then
+          flat[key] = table.concat(value(' '))
+        else
+          flat[key] = value
+        end
+      end
+    end
+    return flat
+  end
+  local inner
+  inner = function(content)
+    for _index_0 = 1, #content do
+      local entry = content[_index_0]
+      local _exp_0 = type(entry)
+      if 'string' == _exp_0 then
+        print(escape(entry))
+      elseif 'function' == _exp_0 then
+        entry()
+      else
+        print(escape(tostring(entry)))
+      end
+    end
+  end
+  node = function(tagname, ...)
+    local arguments = flatten({
+      ...
+    })
+    local content = { }
+    for k, v in ipairs(arguments) do
+      content[k] = v
+      arguments[k] = nil
+    end
+    local handle_content
+    if #content > 0 then
+      handle_content = function()
+        return inner(content)
+      end
+    else
+      handle_content = nil
+    end
+    return node_handler(print, tagname, arguments, handle_content)
+  end
+  return environment
+end
+local call
+call = function(self, fnc)
+  if type(fnc) ~= 'function' then
+    error("Argument must be a function!", 3)
+  end
+  return error("This land is peaceful, it's inhabitants kind. But thou dost not belong.", 3)
+end
+local language
+local derive
+derive = function(self)
+  local derivate = language(self.node_handler)
+  local meta = getmetatable(derivate)
+  meta.__index = self
+  meta = getmetatable(derivate.environment)
+  local parent = self.environment
+  local __index = meta.__index
+  meta.__index = function(self, key)
+    return rawget(self, key) or rawget(parent, key) or __index(self, key)
+  end
+  return derivate
+end
+language = function(node_handler)
+  return setmetatable({
+    node_handler = node_handler,
+    derive = derive,
+    environment = make_environment(node_handler)
+  }, {
+    __call = call
+  })
+end
+return language
