@@ -101,10 +101,47 @@ derive = function(self)
   end
   return derivate
 end
+local readfile
+readfile = function(file)
+  file = assert(io.open(file))
+  local content = file:read("*a")
+  file:close()
+  return content
+end
+local loadlua
+if lua51 then
+  loadlua = function(self, code, name, filter)
+    if name == nil then
+      name = "xhmoon"
+    end
+    if filter then
+      return setfenv(filter(load(code)), name, self.environment)
+    else
+      return setfenv(load(code), name, self.environment)
+    end
+  end
+else
+  loadlua = function(self, code, name, filter)
+    if name == nil then
+      name = "xhmoon"
+    end
+    if filter then
+      return load(filter(code), name, "bt", self.environment)
+    else
+      return load(code, name, "bt", self.environment)
+    end
+  end
+end
+local loadluafile
+loadluafile = function(self, file, filter)
+  return self:loadlua(readfile(file), file, filter)
+end
 language = function(node_handler)
   return setmetatable({
     node_handler = node_handler,
     derive = derive,
+    loadlua = loadlua,
+    loadluafile = loadluafile,
     environment = make_environment(node_handler)
   }, {
     __call = call

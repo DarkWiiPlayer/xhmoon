@@ -78,6 +78,30 @@ derive = =>
 	meta.__index = (key) => rawget(@, key) or rawget(parent, key) or __index(@, key)
 	return derivate
 
+--- Loads an entire file as a string
+readfile = (file) ->
+	file = assert io.open(file)
+	content = file\read("*a")
+	file\close()
+	content
+
+--- Loads a string of lua code with a language environment
+-- @function load
+loadlua = if lua51 then
+	(code, name="xhmoon", filter) =>
+		if filter then
+			setfenv(filter(load(code)), name, @environment)
+		else
+			setfenv(load(code), name, @environment)
+else
+	(code, name="xhmoon", filter) =>
+		if filter then
+			load(filter(code), name, "bt", @environment)
+		else
+			load(code, name, "bt", @environment)
+
+loadluafile = (file, filter) => @loadlua(readfile(file), file, filter)
+
 ---
 -- @section language
 
@@ -88,7 +112,9 @@ language = (node_handler) ->
 	setmetatable {
 		:node_handler
 		:derive
+		:loadlua
+		:loadluafile
 		environment: make_environment node_handler
 		}, {__call: call}
 
-return language
+language
