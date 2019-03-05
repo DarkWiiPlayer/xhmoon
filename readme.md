@@ -40,3 +40,12 @@ The *language* returned by the function provides an environment in which to run
 another function and can be duplicated with the `derive` method.
 Derived languages inherit all of its parents properties and can be modified and
 extended as needed.
+
+Changelog
+--------------------------------------------------------------------------------
+
+### Development (1.2)
+- Delete moonscript file and just switch to Lua
+
+### 1.1
+- Add loadlua and loadluafile functions
