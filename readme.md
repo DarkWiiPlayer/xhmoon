@@ -44,7 +44,7 @@ extended as needed.
 Changelog
 --------------------------------------------------------------------------------
 
-### Development (1.2)
+### 1.1.1
 - Fix severe bugs in loadluafile
 - Delete moonscript file and just switch to Lua
 
