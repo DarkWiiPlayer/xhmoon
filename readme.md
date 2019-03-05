@@ -45,6 +45,7 @@ Changelog
 --------------------------------------------------------------------------------
 
 ### Development (1.2)
+- Fix severe bugs in loadluafile
 - Delete moonscript file and just switch to Lua
 
 ### 1.1

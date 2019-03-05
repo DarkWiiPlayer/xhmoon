@@ -109,27 +109,43 @@ readfile = function(file)
   return content
 end
 local loadlua
-if lua51 then
+if is51 then
   loadlua = function(self, code, name, filter)
+		if type(code)~='string' then
+			local name = debug.getinfo(1, 'n').name or 'loadlua'
+			return nil, 'bad argument #1 to '..name..' (got '..type(code)..', expected string)'
+		end
     if name == nil then
       name = "xhmoon"
     end
     if filter then
-      return setfenv(filter(load(code)), name, self.environment)
-    else
-      return setfenv(load(code), name, self.environment)
+			local err
+			code, err = filter(code)
+			if type(code)~='string' then
+				local name = debug.getinfo(1, 'n').name or 'loadlua'
+				return nil, err, 'bad argument #2 to '..name..' (returned '..type(code)..' instead of string)'
+			end
     end
+		return setfenv(loadstring(code, name), self.environment)
   end
 else
   loadlua = function(self, code, name, filter)
+		if type(code)~='string' then
+			local name = debug.getinfo(1, 'n').name or 'loadlua'
+			return nil, 'bad argument #1 to '..name..' (got '..type(code)..', expected string)'
+		end
     if name == nil then
       name = "xhmoon"
     end
     if filter then
-      return load(filter(code), name, "bt", self.environment)
-    else
-      return load(code, name, "bt", self.environment)
+			local err
+			code, err = filter(code) or code
+			if type(code)~='string' then
+				local name = debug.getinfo(1, 'n').name or 'loadlua'
+				return nil, err or 'bad argument #2 to '..name..' (returned '..type(code)..' instead of string)'
+			end
     end
+		return load(code, name, "bt", self.environment)
   end
 end
 local loadluafile
