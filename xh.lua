@@ -2,11 +2,12 @@
 
 local is51 = _VERSION == 'Lua 5.1'
 local global = _ENV or _G
-local make_environment
-make_environment = function(node_handler)
-	local environment
-	do
-		environment = setmetatable({ }, {
+
+local language -- Function to create a new output language
+
+local function make_environment(node_handler)
+	local environment do
+		environment = setmetatable({}, {
 			__index = function(self, key)
 				local _exp_0 = key
 				if 'escape' == _exp_0 then
@@ -21,12 +22,13 @@ make_environment = function(node_handler)
 			end
 		})
 	end
+
 	if is51 then
 		setfenv(1, environment)
 	end
 	local _ENV = _ENV and environment
-	local flatten
-	flatten = function(tab, flat)
+
+	local function flatten(tab, flat)
 		if flat == nil then
 			flat = { }
 		end
@@ -47,8 +49,7 @@ make_environment = function(node_handler)
 		end
 		return flat
 	end
-	local inner
-	inner = function(content)
+	local function inner(content)
 		for _index_0 = 1, #content do
 			local entry = content[_index_0]
 			local _exp_0 = type(entry)
@@ -82,36 +83,33 @@ make_environment = function(node_handler)
 	end
 	return environment
 end
-local call
-call = function(self, fnc)
-	if type(fnc) ~= 'function' then
-		error("Argument must be a function!", 3)
-	end
-	return error("This land is peaceful, it's inhabitants kind. But thou dost not belong.", 3)
-end
-local language
-local derive
-derive = function(self)
+
+local function derive(self)
 	local derivate = language(self.node_handler)
-	local meta = getmetatable(derivate)
-	meta.__index = self
-	meta = getmetatable(derivate.environment)
+
+	-- Attempt to copy mactos from old environment
+	-- FIXME: the macros keep their own environment, so
+	-- 1. they don't make use of new macros and
+	-- 2. they use the parents print function
+	-- Possible fix: add an init_macros function chain
+	local meta = getmetatable(derivate.environment)
 	local parent = self.environment
 	local __index = meta.__index
 	meta.__index = function(self, key)
 		return rawget(self, key) or rawget(parent, key) or __index(self, key)
 	end
+
 	return derivate
 end
-local readfile
-readfile = function(file)
+
+local function readfile(file)
 	file = assert(io.open(file))
 	local content = file:read("*a")
 	file:close()
 	return content
 end
-local loadlua
-if is51 then
+
+local loadlua if is51 then
 	loadlua = function(self, code, name, filter)
 		if type(code)~='string' then
 			local name = debug.getinfo(1, 'n').name or 'loadlua'
@@ -150,19 +148,19 @@ else
 		return load(code, name, "bt", self.environment)
 	end
 end
-local loadluafile
-loadluafile = function(self, file, filter)
+
+local loadluafile = function(self, file, filter)
 	return self:loadlua(readfile(file), file, filter)
 end
-language = function(node_handler)
-	return setmetatable({
+
+function language(node_handler)
+	return {
 		node_handler = node_handler,
 		derive = derive,
 		loadlua = loadlua,
 		loadluafile = loadluafile,
 		environment = make_environment(node_handler)
-	}, {
-		__call = call
-	})
+	}
 end
+
 return language
