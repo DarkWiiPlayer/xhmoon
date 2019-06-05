@@ -44,6 +44,10 @@ extended as needed.
 Changelog
 --------------------------------------------------------------------------------
 
+### 1.1.2
+- Rename file from xh.lua to xhmoon.lua for consistency
+- Add some basic tests
+
 ### 1.1.1
 - Fix severe bugs in loadluafile
 - Delete moonscript file and just switch to Lua
