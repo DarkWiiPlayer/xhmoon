@@ -19,6 +19,6 @@ dependencies = {
 build = {
 	type = "builtin",
 	modules = {
-		xhmoon = 'xh.lua'
+		xhmoon = 'xhmoon.lua'
 	}
 }
