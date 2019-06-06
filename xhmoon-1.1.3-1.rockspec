@@ -1,8 +1,9 @@
 rockspec_format = "3.0"
 package = "xhmoon"
-version = "dev-1"
+version = "1.1.3-1"
 source = {
 	url = "git://github.com/DarkWiiPlayer/xhmoon.git";
+	tag = 'v1.1.3';
 }
 description = {
 	summary = "Helper library for MoonXML.";
