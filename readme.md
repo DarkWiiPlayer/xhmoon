@@ -44,6 +44,10 @@ extended as needed.
 Changelog
 --------------------------------------------------------------------------------
 
+### 1.1.3
+- Fix bug that was causing derived languages not to inherit methods defined
+	directly on their parents
+
 ### 1.1.2
 - Rename file from xh.lua to xhmoon.lua for consistency
 - Add some basic tests

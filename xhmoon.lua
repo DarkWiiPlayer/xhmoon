@@ -92,12 +92,15 @@ local function derive(self)
 	-- 1. they don't make use of new macros and
 	-- 2. they use the parents print function
 	-- Possible fix: add an init_macros function chain
-	local meta = getmetatable(derivate.environment)
-	local parent = self.environment
-	local __index = meta.__index
-	meta.__index = function(self, key)
-		return rawget(self, key) or rawget(parent, key) or __index(self, key)
+	do local meta = getmetatable(derivate.environment)
+		local parent = self.environment
+		local __index = meta.__index
+		meta.__index = function(self, key)
+			return rawget(self, key) or rawget(parent, key) or __index(self, key)
+		end
 	end
+
+	setmetatable(derivate, {__index = self})
 
 	return derivate
 end
