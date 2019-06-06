@@ -17,6 +17,12 @@ describe 'xhmoon', ->
 			assert.is.table lang
 
 	describe 'languages', ->
+		it 'should have a loadlua function', ->
+			assert.is.function lang.loadlua
+
+		it 'should have a loadluafile function', ->
+			assert.is.function lang.loadluafile
+
 		setup -> export lang = xhmoon(node_handler)
 
 		it 'should generate templates from strings', ->
