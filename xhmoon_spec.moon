@@ -30,6 +30,21 @@ describe 'xhmoon', ->
 			assert.is.string select 2, lang\loadlua!
 			assert.is.function lang\loadlua[[print 'test']]
 	
+	describe 'derived languages', ->
+		setup ->
+			lang = xhmoon(node_handler)
+			lang.foo = ->
+			export derived = lang\derive!
+
+		it 'should have a loadlua function', ->
+			assert.is.function derived.loadlua
+
+		it 'should have a loadluafile function', ->
+			assert.is.function derived.loadluafile
+
+		it 'should keep their parents methods', ->
+			assert.is.function derived.foo
+	
 	describe 'templates', ->
 		setup -> export lang = xhmoon(node_handler)
 
