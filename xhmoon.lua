@@ -84,25 +84,48 @@ local function make_environment(node_handler)
 	return environment
 end
 
-local function derive(self)
-	local derivate = language(self.node_handler)
+local initialize
+if is51 then
+	function initialize(environment, initializer)
+		local e = getfenv(initializer)
+		setfenv(initializer, environment)
+		initializer(environment)
+		setfenv(initializer, e)
+		return env
+	end
+else
+	function initialize(environment, initializer)
+		initializer(environment)
+		return env
+	end
+end
 
-	-- Attempt to copy mactos from old environment
-	-- FIXME: the macros keep their own environment, so
-	-- 1. they don't make use of new macros and
-	-- 2. they use the parents print function
-	-- Possible fix: add an init_macros function chain
+local function chaininit(language, current)
+	current = current or language
+	if current.parent then
+		chaininit(language, current.parent)
+	end
+	if current.initializer then
+		initialize(language.environment, current.initializer)
+	end
+	return language
+end
+
+local function derive(parent, initializer)
+	local derivate = language(parent.node_handler)
+	derivate.parent = parent
+	derivate.initializer = initializer
+
 	do local meta = getmetatable(derivate.environment)
-		local parent = self.environment
+		local parent = parent.environment
 		local __index = meta.__index
-		meta.__index = function(self, key)
-			return rawget(self, key) or rawget(parent, key) or __index(self, key)
+		meta.__index = function(parent, key)
+			return rawget(parent, key) or rawget(parent, key) or __index(parent, key)
 		end
 	end
+	setmetatable(derivate, {__index = parent})
 
-	setmetatable(derivate, {__index = self})
-
-	return derivate
+	return chaininit(derivate)
 end
 
 local function readfile(file)
@@ -156,13 +179,18 @@ local loadluafile = function(self, file, filter)
 	return self:loadlua(readfile(file), file, filter)
 end
 
-function language(node_handler)
+function language(node_handler, initializer)
+	local environment = make_environment(node_handler)
+	if initializer then
+		initialize(environment, initializer)
+	end
 	return {
+		initializer = initializer,
 		node_handler = node_handler,
 		derive = derive,
 		loadlua = loadlua,
 		loadluafile = loadluafile,
-		environment = make_environment(node_handler)
+		environment = environment
 	}
 end
 
