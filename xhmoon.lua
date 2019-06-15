@@ -41,7 +41,7 @@ local function make_environment(node_handler)
 				end
 			else
 				if type(value) == "table" then
-					flat[key] = table.concat(value(' '))
+					flat[key] = table.concat(value, ' ')
 				else
 					flat[key] = value
 				end
