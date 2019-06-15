@@ -44,15 +44,3 @@ describe 'xhmoon', ->
 
 		it 'should keep their parents methods', ->
 			assert.is.function derived.foo
-	
-	describe 'templates', ->
-		setup -> export lang = xhmoon(node_handler)
-
-		it 'should call print', ->
-			printer = spy.new ->
-			lang.environment.print = printer
-			template = lang\loadlua[[h1 'test']]
-			template()
-			assert.spy(printer).was_called_with '<h1>'
-			assert.spy(printer).was_called_with 'test'
-			assert.spy(printer).was_called_with '</h1>'
