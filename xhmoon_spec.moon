@@ -20,8 +20,12 @@ describe 'xhmoon', ->
 		it 'should have a loadlua function', ->
 			assert.is.function lang.loadlua
 
+		describe 'loadlua', -> pending 'should work', -> nil
+
 		it 'should have a loadluafile function', ->
 			assert.is.function lang.loadluafile
+
+		describe 'loadluafile', -> pending 'should work', -> nil
 
 		setup -> export lang = xhmoon(node_handler)
 
