@@ -1,4 +1,3 @@
-package.path = './?.lua;'..package.path
 xhmoon = require 'xhmoon'
 
 describe 'xhmoon', ->
