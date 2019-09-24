@@ -16,6 +16,8 @@ describe 'xhmoon', ->
 			assert.is.table lang
 
 	describe 'languages', ->
+		it 'should have a default escape method', ->
+			assert.is.equal 'foo', lang.environment.escape('foo')
 		it 'should have a loadlua function', ->
 			assert.is.function lang.loadlua
 
