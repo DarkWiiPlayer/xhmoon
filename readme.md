@@ -15,28 +15,31 @@ from an xhmoon template, and are internally represetned as a table.
 
 A node handler should accept four arguments:
 
-- print
-	The function it should use to output text
-- Tag name
-	The name of the tag to be generated
-- attributes
-	A table of key-value pairs representing attributes of the node
-- content
-	A function that should be called where the content of the node should go
+-	Environment
+	The environment of the language.
+-	Tag name
+	The name of the tag to be generated.
+-	Attributes
+	A table of key-value pairs representing attributes of the node.
+-	Content
+	A function that should be called where the content of the node should go.
+	If it is given an argument, it will assume it to be a function that escapes
+	a string and call it on text entries; if not, it won't escape text by
+	default.
 
 An example node handler for XML:
 
-	function(print, tag, args, inner)
+	function(env, tag, args, inner)
 		local argstrings = {}
 		for key, value in pairs(args) do
 			table.insert(argstrings, ('%s="%s"'):format(key, value))
 		end
 		if inner
-			print(([[<%s %s >]]):format(tag, table.concat(argstrings)))
-			inner()
-			print(([[</%s>]]):format(tag))
+			env.print(([[<%s %s >]]):format(tag, table.concat(argstrings)))
+			inner(escape)
+			env.print(([[</%s>]]):format(tag))
 		else
-			print(([[<%s %s />]]):format(tag, table.concat(argstrings)))
+			env.print(([[<%s %s />]]):format(tag, table.concat(argstrings)))
 		end
 	end
 
@@ -80,6 +83,10 @@ special meening and in 5.2+ it sets the environment of the function.
 
 Changelog
 --------------------------------------------------------------------------------
+
+### 2.0.0
+- Make escaping by default optional
+- Kinda wreck the interface
 
 ### 1.2.0
 - Add initializers
