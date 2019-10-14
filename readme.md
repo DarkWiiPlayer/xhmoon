@@ -84,6 +84,9 @@ special meening and in 5.2+ it sets the environment of the function.
 Changelog
 --------------------------------------------------------------------------------
 
+### 2.0.1
+- Fix bug with environment inheritance
+
 ### 2.0.0
 - Make escaping by default optional
 - Kinda wreck the interface

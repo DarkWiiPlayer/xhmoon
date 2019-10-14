@@ -3,7 +3,59 @@
 local is51 = _VERSION == 'Lua 5.1'
 local global = _ENV or _G
 
+local function flatten(tab, flat)
+	if flat == nil then
+		flat = { }
+	end
+	for key, value in pairs(tab) do
+		if type(key) == "number" then
+			if type(value) == "table" then
+				flatten(value, flat)
+			else
+				flat[#flat + 1] = value
+			end
+		else
+			if type(value) == "table" then
+				flat[key] = table.concat(value, ' ')
+			else
+				flat[key] = value
+			end
+		end
+	end
+	return flat
+end
+
+local function inner(_ENV, content, escape)
+	if is51 then setfenv(1, _ENV) end
+	for i = 1, #content do
+		local entry = content[i]
+		if type(entry) == 'string' then
+			print(escape and escape(entry) or entry)
+		elseif ttype(entry) =='function' then
+			entry()
+		else
+			print(escape and escape(tostring(entry)) or tostring(entry))
+		end
+	end
+end
+
 local language -- Function to create a new output language
+
+local function bind_node_function(_ENV, node_handler)
+	if is51 then setfenv(1, _ENV) end
+	return function(tagname, ...)
+		local arguments = flatten({...})
+		local content = {}
+		for k, v in ipairs(arguments) do
+			content[k] = v
+			arguments[k] = nil
+		end
+		return node_handler(
+			_ENV, tagname, arguments,
+			#content>0 and function(escape) return inner(_ENV, content, escape) end
+		)
+	end
+end
 
 local function make_environment(node_handler)
 	local environment do
@@ -29,51 +81,7 @@ local function make_environment(node_handler)
 	end
 	local _ENV = _ENV and environment
 
-	local function flatten(tab, flat)
-		if flat == nil then
-			flat = { }
-		end
-		for key, value in pairs(tab) do
-			if type(key) == "number" then
-				if type(value) == "table" then
-					flatten(value, flat)
-				else
-					flat[#flat + 1] = value
-				end
-			else
-				if type(value) == "table" then
-					flat[key] = table.concat(value, ' ')
-				else
-					flat[key] = value
-				end
-			end
-		end
-		return flat
-	end
-	local function inner(content, escape)
-		for i = 1, #content do
-			local entry = content[i]
-			if type(entry) == 'string' then
-				print(escape and escape(entry) or entry)
-			elseif ttype(entry) =='function' then
-				entry()
-			else
-				print(escape and escape(tostring(entry)) or tostring(entry))
-			end
-		end
-	end
-	node = function(tagname, ...)
-		local arguments = flatten({...})
-		local content = {}
-		for k, v in ipairs(arguments) do
-			content[k] = v
-			arguments[k] = nil
-		end
-		return node_handler(
-			_ENV, tagname, arguments,
-			#content>0 and function(escape) return inner(content, escape) end
-		)
-	end
+	node = bind_node_function(environment, node_handler)
 	return environment
 end
 
@@ -109,6 +117,7 @@ local function derive(parent, initializer)
 	derivate.parent = parent
 	derivate.initializer = initializer
 
+	derivate.environment.node = bind_node_function(derivate.environment, derivate.node_handler)
 	do local meta = getmetatable(derivate.environment)
 		local parent = parent.environment
 		local __index = meta.__index
