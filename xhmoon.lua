@@ -9,13 +9,14 @@ local function make_environment(node_handler)
 	local environment do
 		environment = setmetatable({}, {
 			__index = function(self, key)
-				local _exp_0 = key
-				if 'escape' == _exp_0 then
+				if global[key] then
+					return global[key]
+				elseif key == 'escape' then
 					return function(...)
 						return ...
 					end
 				else
-					return global[key] or function(...)
+					return function(...)
 						return self.node(key, ...)
 					end
 				end
@@ -50,12 +51,11 @@ local function make_environment(node_handler)
 		return flat
 	end
 	local function inner(content)
-		for _index_0 = 1, #content do
-			local entry = content[_index_0]
-			local _exp_0 = type(entry)
-			if 'string' == _exp_0 then
+		for i = 1, #content do
+			local entry = content[i]
+			if type(entry) == 'string' then
 				print(escape(entry))
-			elseif 'function' == _exp_0 then
+			elseif ttype(entry) =='function' then
 				entry()
 			else
 				print(escape(tostring(entry)))
