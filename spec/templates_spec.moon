@@ -32,6 +32,9 @@ describe 'xhmoon', ->
 				.was_called_with('foo', 'foo')
 				.was_called_with('bar', 'bar')
 
+		it 'should handle function nodes', ->
+			assert.has_no_errors language\loadlua [[h1(function() b 'foo' end)]]
+
 		it 'should handle nested arguments', ->
 			template = language\loadlua [[element{{foo='foo'}, {bar='bar'}}]]
 			language.environment.print = stub.new()

@@ -31,7 +31,7 @@ local function inner(_ENV, content, escape)
 		local entry = content[i]
 		if type(entry) == 'string' then
 			print(escape and escape(entry) or entry)
-		elseif ttype(entry) =='function' then
+		elseif type(entry) =='function' then
 			entry()
 		else
 			print(escape and escape(tostring(entry)) or tostring(entry))
