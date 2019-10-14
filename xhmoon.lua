@@ -50,36 +50,29 @@ local function make_environment(node_handler)
 		end
 		return flat
 	end
-	local function inner(content)
+	local function inner(content, escape)
 		for i = 1, #content do
 			local entry = content[i]
 			if type(entry) == 'string' then
-				print(escape(entry))
+				print(escape and escape(entry) or entry)
 			elseif ttype(entry) =='function' then
 				entry()
 			else
-				print(escape(tostring(entry)))
+				print(escape and escape(tostring(entry)) or tostring(entry))
 			end
 		end
 	end
 	node = function(tagname, ...)
-		local arguments = flatten({
-			...
-		})
-		local content = { }
+		local arguments = flatten({...})
+		local content = {}
 		for k, v in ipairs(arguments) do
 			content[k] = v
 			arguments[k] = nil
 		end
-		local handle_content
-		if #content > 0 then
-			handle_content = function()
-				return inner(content)
-			end
-		else
-			handle_content = nil
-		end
-		return node_handler(print, tagname, arguments, handle_content)
+		return node_handler(
+			_ENV, tagname, arguments,
+			#content>0 and function(escape) return inner(content, escape) end
+		)
 	end
 	return environment
 end

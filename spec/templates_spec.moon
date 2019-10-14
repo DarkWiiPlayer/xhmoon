@@ -3,12 +3,12 @@ xhmoon = require 'xhmoon'
 describe 'xhmoon', ->
 	describe 'templates', ->
 		setup ->
-			export node_handler = (print, tagname, arguments, handle_content) ->
-				print("<#{tagname}>")
+			export node_handler = (env, tagname, arguments, handle_content) ->
+				env.print("<#{tagname}>")
 				for key, value in pairs(arguments)
-					print(key, value)
+					env.print(key, value)
 				handle_content! if handle_content
-				print("</#{tagname}>")
+				env.print("</#{tagname}>")
 			export language = xhmoon(node_handler)
 		
 		it 'should be functions', ->
