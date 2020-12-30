@@ -154,7 +154,7 @@ local loadlua if is51 then
 				return nil, err, 'bad argument #2 to '..name..' (returned '..type(code)..' instead of string)'
 			end
 		end
-		return setfenv(loadstring(code, name), self.environment)
+		return setfenv(assert(loadstring(code, name)), self.environment)
 	end
 else
 	loadlua = function(self, code, name, filter)
