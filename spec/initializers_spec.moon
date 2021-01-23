@@ -10,21 +10,21 @@ describe 'xhmoon', ->
 	describe 'initializers', ->
 		setup -> export language = xhmoon(node_handler)
 
-		it 'should be called on new languages', ->
+		it 'should be called on new languages #newinit', ->
 			initializer = stub.new!
 			----------------------------------------
-			lang = xhmoon(node_handler, => initializer @)
+			lang = xhmoon(node_handler, (...) -> initializer(...))
 			----------------------------------------
-			assert.stub(initializer).was_called_with(lang.environment)
+			assert.stub(initializer).was_called_with(lang.environment, lang)
 
 		it 'should be called on derived languages', ->
 			initializer = stub.new!
 			parent_init = stub.new!
 			----------------------------------------
 			parent = xhmoon node_handler, => parent_init @
-			child = parent\derive => initializer @
+			child = parent\derive (...) -> initializer(...)
 			----------------------------------------
-			assert.stub(initializer).was_called_with child.environment
+			assert.stub(initializer).was_called_with(child.environment, child)
 			assert.stub(parent_init).was_called!
 
 		it 'should set values on new languages', ->

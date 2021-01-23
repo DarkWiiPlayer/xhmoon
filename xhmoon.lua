@@ -87,17 +87,15 @@ end
 
 local initialize
 if is51 then
-	function initialize(environment, initializer)
+	function initialize(language, initializer)
 		local e = getfenv(initializer)
-		setfenv(initializer, environment)
-		initializer(environment)
+		setfenv(initializer, language.environment)
+		initializer(language.environment, language)
 		setfenv(initializer, e)
-		return env
 	end
 else
-	function initialize(environment, initializer)
-		initializer(environment)
-		return env
+	function initialize(language, initializer)
+		initializer(language.environment, language)
 	end
 end
 
@@ -107,7 +105,7 @@ local function chaininit(language, current)
 		chaininit(language, current.parent)
 	end
 	if current.initializer then
-		initialize(language.environment, current.initializer)
+		initialize(language, current.initializer)
 	end
 	return language
 end
@@ -183,10 +181,7 @@ end
 
 function language(node_handler, initializer)
 	local environment = make_environment(node_handler)
-	if initializer then
-		initialize(environment, initializer)
-	end
-	return {
+	local new = {
 		initializer = initializer,
 		node_handler = node_handler,
 		derive = derive,
@@ -194,6 +189,10 @@ function language(node_handler, initializer)
 		loadluafile = loadluafile,
 		environment = environment
 	}
+	if initializer then
+		initialize(new, initializer)
+	end
+	return new
 end
 
 return language
